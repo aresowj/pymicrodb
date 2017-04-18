@@ -1,0 +1,11 @@
+.idea/
+
+env/
+venv
+
+*/logs/
+
+pymicrodb.log
+
+__pycache__/
+*.pyc
