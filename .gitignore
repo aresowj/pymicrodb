@@ -6,6 +6,8 @@ venv
 */logs/
 
 pymicrodb.log
+pymicrodb.json
+DB_TEST*
 
 __pycache__/
 *.pyc

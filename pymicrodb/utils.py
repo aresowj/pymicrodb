@@ -2,5 +2,5 @@ import uuid
 
 
 def generate_id():
-    # type: () -> int
+    # type: () -> str
     return str(uuid.uuid4())

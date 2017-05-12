@@ -169,3 +169,4 @@ class GeneralLogger(object):
 
 logger_manager = GeneralLogger()
 logger_manager.set_log_path('pymicrodb.log')
+logger_manager.set_log_level(logging.INFO)

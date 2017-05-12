@@ -3,54 +3,74 @@
 import json
 import threading
 import os
+import time
+from datetime import datetime
 
 from pymicrodb.logger import logger_manager
 from pymicrodb.utils import generate_id
-
+from pymicrodb.configs import configs
 
 logger = logger_manager.get_logger()
 
 
-class Database(object):
+class PyMicroDB(object):
     def __init__(self, db_path):
         # type: (str) -> None
         self._db_path = db_path
+        self.opened = False
         self._storage = {}  # type: dict[str, dict]
-        self._file = None
-        self._write_lock = threading.RLock()
         self._save_lock = threading.RLock()
+        self._last_saved = datetime.now()
+        self._open()
         self._load()
+        self._start_worker()
+
+    def __del__(self):
+        self.exit()
+
+    def _open(self):
+        self._file_handle = open(self._db_path, 'w+b')
+        self.opened = True
 
     def _load(self):
         # type: () -> None
-        if not os.path.exists(self._db_path):
-            return
+        try:
+            self._storage = json.load(self._file_handle)
+        except ValueError:
+            self._storage = {}
 
-        with open(self._db_path, 'rb') as f:
-            line_no = 1
-            for line in f.readlines():
-                if not line:
-                    continue
+    def close(self):
+        self._file_handle.truncate()
+        self._file_handle.close()
 
-                try:
-                    doc = json.loads(line.decode(encoding='utf-8'))
-                except (TypeError, UnicodeDecodeError) as e:
-                    logger.error('Failed to decode document at line {}'.format(line_no))
-                    logger.exception(e)
-                else:
-                    try:
-                        self._storage[doc['id']] = doc
-                    except KeyError:
-                        logger.warning('Field `id` not found for document at line {}'.format(line_no))
+    def exit(self):
+        if self.opened:
+            self.save()
+            self.close()
 
-                line_no += 1
+    def _start_worker(self):
+        self._worker = threading.Thread(target=self._save_worker)
+        self._worker.setDaemon(True)
+        self._worker.start()
 
-    def _save(self):
-        logger.info('Saving entries to local file {}...'.format(self._db_path))
+    def _save_worker(self):
+        """Save in-memory storage into a local file by interval."""
+        while True:
+            time.sleep(configs['save_interval'])
+            self.save()
+
+    def save(self):
+        logger.debug('Saving entries to local file {}...'.format(self._db_path))
         with self._save_lock:
-            with open(self._db_path, 'wb') as f:
-                for doc in self._storage.values():
-                    f.write((json.dumps(doc) + '\n').encode(encoding='utf-8'))
+            self._file_handle.seek(0)
+            json.dump(self._storage, self._file_handle)
+
+    def save_expired(self):
+        """Decide if current data needs to be saved due to save time expired."""
+        return (datetime.now() - self._last_saved).seconds >= configs['save_interval']
+
+    def count(self):
+        return len(self._storage)
 
     def get(self, key):
         # type: (str) -> dict
@@ -61,14 +81,9 @@ class Database(object):
         doc['id'] = key
         self._storage[key] = doc
 
-        with self._write_lock:
-            threading.Thread(target=self._save).run()
-
     def insert(self, doc):
         # type: (dict) -> str
         new_id = generate_id()
-        doc['id'] = new_id
-
         self.put(new_id, doc)
 
         return new_id
