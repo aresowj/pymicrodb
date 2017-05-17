@@ -10,6 +10,7 @@ from pymicrodb import PyMicroDB
 from pymicrodb.logger import logger_manager
 from pymicrodb.constants import SECOND_TO_MICROSECOND
 
+
 TEST_FILE_NAME = 'DB_TEST_' + str(int(time.time())) + '.bson'
 INSERT_TIMES = 10000
 logger = logger_manager.get_logger()
@@ -18,11 +19,13 @@ logger = logger_manager.get_logger()
 class PyMicroDBPerformanceTestCase(unittest.TestCase):
     def setUp(self):
         self._db = PyMicroDB(TEST_FILE_NAME)
+        self._sample_doc = {}
+
+        # Initiates
         self._load_sample_doc()
 
     def tearDown(self):
-        # os.remove(TEST_FILE_NAME)
-        pass
+        os.remove(TEST_FILE_NAME)
 
     def _load_sample_doc(self):
         with open(os.path.join(os.path.dirname(__file__),
@@ -36,6 +39,7 @@ class PyMicroDBPerformanceTestCase(unittest.TestCase):
             self._db.insert(self._sample_doc)
 
         end_time = datetime.now()
-        logger.info('{} inserts in {} seconds'
-                    .format(INSERT_TIMES,
-                            (end_time - start_time).microseconds / SECOND_TO_MICROSECOND))
+        seconds = (end_time - start_time).microseconds / SECOND_TO_MICROSECOND
+        per_second = int(INSERT_TIMES / seconds)
+        logger.info('{} inserts in {} seconds, {} insert per second.'
+                    .format(INSERT_TIMES, seconds, per_second))

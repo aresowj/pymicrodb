@@ -11,3 +11,5 @@ DB_TEST*
 
 __pycache__/
 *.pyc
+
+.DS_Store
