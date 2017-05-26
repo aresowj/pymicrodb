@@ -162,9 +162,13 @@ class UnitTestCase(unittest.TestCase):
         self.assertEqual(self.db._storage[new_id], sample_doc)
 
     def test_insert_doc_persist(self):
-        """Test if the doc is persisted even if original doc is deleted."""
+        # Test if the doc is persisted even if original doc is deleted.
         sample_doc = load_sample_doc()
         new_id = self.db.insert(sample_doc)
 
         del sample_doc
         self.assertEqual(self.db._storage[new_id], load_sample_doc())
+
+
+if __name__ == '__main__':
+    unittest.main()

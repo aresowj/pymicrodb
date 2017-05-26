@@ -3,7 +3,6 @@
 import time
 import unittest
 import os
-import json
 from datetime import datetime
 
 from pymicrodb import PyMicroDB
@@ -37,3 +36,6 @@ class PerformanceTestCase(unittest.TestCase):
         per_second = int(INSERT_TIMES / seconds)
         logger.info('{} inserts in {} seconds, {} insert per second.'
                     .format(INSERT_TIMES, seconds, per_second))
+
+if __name__ == '__main__':
+    unittest.main()
