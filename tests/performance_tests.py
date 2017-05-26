@@ -9,6 +9,7 @@ from datetime import datetime
 from pymicrodb import PyMicroDB
 from pymicrodb.logger import logger_manager
 from pymicrodb.constants import SECOND_TO_MICROSECOND
+from tests.test_utils import load_sample_doc
 
 
 TEST_FILE_NAME = 'DB_TEST_' + str(int(time.time())) + '.bson'
@@ -16,21 +17,14 @@ INSERT_TIMES = 10000
 logger = logger_manager.get_logger()
 
 
-class PyMicroDBPerformanceTestCase(unittest.TestCase):
+class PerformanceTestCase(unittest.TestCase):
     def setUp(self):
         self._db = PyMicroDB(TEST_FILE_NAME)
-        self._sample_doc = {}
-
-        # Initiates
-        self._load_sample_doc()
+        self._sample_doc = load_sample_doc()
 
     def tearDown(self):
-        os.remove(TEST_FILE_NAME)
-
-    def _load_sample_doc(self):
-        with open(os.path.join(os.path.dirname(__file__),
-                               'fixtures/sample_doc.bson')) as f:
-            self._sample_doc = json.loads(f.read())
+        if os.path.exists(TEST_FILE_NAME):
+            os.remove(TEST_FILE_NAME)
 
     def test_inserts_per_second(self):
         start_time = datetime.now()
