@@ -34,7 +34,7 @@ class PyMicroDB(object):
         self.exit()
 
     def _open(self):
-        self._file_handle = open(self.db_path, 'w+b')
+        self._file_handle = open(self.db_path, 'w+')
         self.opened = True
 
     def _load(self):

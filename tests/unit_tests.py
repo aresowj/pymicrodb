@@ -3,6 +3,7 @@ import time
 import os
 import copy
 import json
+import six
 from mock import patch, MagicMock
 from datetime import datetime, timedelta
 
@@ -158,7 +159,7 @@ class UnitTestCase(unittest.TestCase):
     def test_insert(self):
         sample_doc = load_sample_doc()
         new_id = self.db.insert(sample_doc)
-        self.assertIsInstance(new_id, (str, unicode))
+        self.assertIsInstance(new_id, six.string_types)
         self.assertEqual(self.db._storage[new_id], sample_doc)
 
     def test_insert_doc_persist(self):
