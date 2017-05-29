@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-old_path=$(PWD)
+old_path=$(pwd)
 old_pythonpath=$PYTHONPATH
 . ./venv/bin/activate
 export PYTHONPATH=$PYTHONPATH:$PWD
